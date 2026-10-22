@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dwanaście Prac Heraklesa - Interaktywna Gra RPG (Liceum)</title>
+    <style>
+        :root {
+            --gold: #f1c40f;
+            --gold-dark: #d4ac0d;
+            --bg-dark: #120904;
+            --card-bg: #221207;
+            --card-border: #8b5a2b;
+            --text-light: #f5ebd6;
+            --accent-red: #e74c3c;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', 'Segoe UI', serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-image: radial-gradient(circle, #2d180b 0%, #120904 100%);
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 780px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 3px solid var(--gold);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.9), inset 0 0 15px rgba(241, 196, 15, 0.1);
+            position: relative;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #ebdcb9;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: #120904;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(241, 196, 15, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: #fff;
+        }
+
+        .btn-hero {
+            background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%);
+            color: #fff;
+            border: 2px solid var(--gold);
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid var(--gold);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .avatar-card {
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px;
+            background: rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-card:hover, .avatar-card.selected {
+            border-color: var(--gold);
+            background: rgba(241, 196, 15, 0.25);
+            transform: scale(1.04);
+        }
+
+        .avatar-icon {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .option-card {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--gold);
+            color: var(--text-light);
+            padding: 14px 18px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-card:hover {
+            background: rgba(241, 196, 15, 0.2);
+            transform: translateX(4px);
+        }
+
+        .read-warning {
+            background: rgba(231, 76, 60, 0.15);
+            border: 2px dashed var(--gold);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--gold);
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .success-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(20, 82, 40, 0.95);
+            border-radius: 13px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            animation: fadeIn 0.3s ease-out;
+            padding: 20px;
+        }
+
+        .success-overlay h2 {
+            color: #2ecc71;
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.8);
+        }
+
+        .gameover-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(120, 10, 10, 0.96);
+            border-radius: 13px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .gameover-overlay h2 {
+            color: #ff3333;
+            font-size: 2.5rem;
+            text-shadow: 0 0 15px #ff0000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        canvas#swordCanvas {
+            border: 3px solid var(--gold);
+            background: #fff;
+            border-radius: 8px;
+            cursor: crosshair;
+            touch-action: none;
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--gold);
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: rgba(241, 196, 15, 0.25);
+            color: var(--gold);
+        }
+
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 220px;
+            margin-top: 25px;
+        }
+
+        .podium-step {
+            width: 100px;
+            border: 2px solid var(--gold);
+            border-bottom: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 10px;
+            margin: 0 6px;
+            border-radius: 10px 10px 0 0;
+            font-weight: bold;
+        }
+
+        .podium-1 { height: 170px; background: linear-gradient(0deg, #d4ac0d, #f1c40f); color: #000; }
+        .podium-2 { height: 120px; background: linear-gradient(0deg, #7f8c8d, #bdc3c7); color: #000; }
+        .podium-3 { height: 80px; background: linear-gradient(0deg, #a0522d, #cd7f32); color: #000; }
+
+        .banner-5 {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 0 0 12px #ff0000;
+            animation: pulse 1s infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            background: var(--gold);
+            color: #000;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .memory-card.flipped { background: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- EKRAN GŁÓWNY -->
+    <div id="screen-main" class="card">
+        <h1>Dwanaście Prac Heraklesa</h1>
+        <p>Zaawansowana gra RPG dla szkół średnich. Podejmuj decyzje, analizuj taktyki i przejdź 12 prac Heraklesa!</p>
+        <div style="margin-top: 20px;">
+            <button class="btn" onclick="openHostLogin()">HOST (Nauczyciel)</button>
+            <button class="btn" onclick="openJoin()">JOIN (Uczeń)</button>
+        </div>
+    </div>
+
+    <!-- LOGOWANIE HOSTA -->
+    <div id="screen-host-login" class="card hidden">
+        <h2>Panel Nauczyciela</h2>
+        <p>Podaj kod dostępu nauczyciela:</p>
+        <input type="password" id="host-pass-input" placeholder="Wpisz kod">
+        <div>
+            <button class="btn" onclick="submitHostLogin()">Zaloguj</button>
+            <button class="btn btn-danger" onclick="show('screen-main')">Wróć</button>
+        </div>
+    </div>
+
+    <!-- PANEL HOSTA -->
+    <div id="screen-host-panel" class="card hidden">
+        <h2>KOD POKOJU: <span id="host-code-display" style="color:var(--gold); font-size:2.2rem;">----</span></h2>
+        
+        <div id="host-lobby-view">
+            <p>Uczniowie wchodzą w <b>JOIN</b> i podają ten kod.</p>
+            <h3>Dołączeni uczniowie (<span id="player-count">0</span>):</h3>
+            <div id="player-list-names" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;">Czekam na graczy...</div>
+            <button class="btn" onclick="startHostGame()">🚀 ZACZNIJ GRĘ DLA WSZYSTKICH</button>
+        </div>
+
+        <div id="host-game-view" class="hidden">
+            <h3>Podgląd Postępów na Żywo</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gracz</th>
+                        <th>Heros</th>
+                        <th>Praca</th>
+                        <th>Porażki (Game Over)</th>
+                        <th>Stan</th>
+                    </tr>
+                </thead>
+                <tbody id="host-tbody"></tbody>
+            </table>
+        </div>
+
+        <div id="host-podium-view" class="hidden">
+            <div class="banner-5">GRATULACJE 5 ZA AKTYWNOŚĆ 🥇</div>
+            <div class="podium-container">
+                <div class="podium-step podium-2">
+                    <span id="pod-2-name">-</span>
+                    <small id="pod-2-time"></small>
+                    <h2>2</h2>
+                </div>
+                <div class="podium-step podium-1">
+                    <span id="pod-1-name">-</span>
+                    <small id="pod-1-time"></small>
+                    <h2>1</h2>
+                </div>
+                <div class="podium-step podium-3">
+                    <span id="pod-3-name">-</span>
+                    <small id="pod-3-time"></small>
+                    <h2>3</h2>
+                </div>
+            </div>
+            <button class="btn" style="margin-top: 20px;" onclick="location.reload()">Resetuj Pokój</button>
+        </div>
+    </div>
+
+    <!-- JOIN UCZNIA -->
+    <div id="screen-join" class="card hidden">
+        <h2>Dołącz do Gry</h2>
+        <input type="text" id="join-room-code" placeholder="4-cyfrowy Kod Pokoju" maxlength="4">
+        <input type="text" id="join-player-name" placeholder="Twoje Imię" maxlength="15">
+        
+        <h3>Wybierz Mitycznego Herosa:</h3>
+        <div class="avatar-grid" id="avatar-select-grid"></div>
+
+        <div>
+            <button class="btn" onclick="submitJoin()">Ruszaj do Gry!</button>
+            <button class="btn btn-danger" onclick="show('screen-main')">Wróć</button>
+        </div>
+    </div>
+
+    <!-- POCZEKALNIA -->
+    <div id="screen-player-wait" class="card hidden">
+        <h2>Oczekiwanie w Pokoju...</h2>
+        <p>Jesteś połączony jako: <b id="wait-name-display" style="color:var(--gold);"></b></p>
+        <p>Gdy nauczyciel uruchomi grę, rozpoczniesz pierwszą pracę!</p>
+
+        <div class="read-warning">
+            📖 UWAŻNIE CZYTAJ WSZYSTKIE TEKSTY PRAC I FABUŁY! Będą Ci niezbędne w finałowym quizie Kahoot!
+        </div>
+    </div>
+
+    <!-- RYSOWANIE BRONI -->
+    <div id="screen-draw-weapon" class="card hidden">
+        <h2>Wykuj Swoją Broń</h2>
+        <p>Zanim wyruszysz na pierwszą pracę, narysuj broń, której użyjesz w walce:</p>
+        <canvas id="swordCanvas" width="300" height="220"></canvas>
+        <div>
+            <button class="btn" onclick="clearCanvas()">Wyczyść</button>
+            <button class="btn" onclick="confirmWeapon()">Zatwierdź Broń</button>
+        </div>
+    </div>
+
+    <!-- INTRO PRACY -->
+    <div id="screen-labor-intro" class="card hidden">
+        <h2 id="intro-title">Praca 1</h2>
+        
+        <div style="text-align: left; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border-left: 4px solid var(--gold); margin-bottom: 15px;">
+            <h4 style="color:var(--gold); margin-bottom: 5px;">CEL PRACY I WARUNKI MITOLOGICZNE:</h4>
+            <p id="intro-goal-text" style="margin-bottom:0; font-size:1rem;"></p>
+        </div>
+
+        <div class="read-warning">
+            ⚠️ Zapamiętuj nazwy geograficzne i postacie! Przydadzą się w finałowym quizie Kahoot.
+        </div>
+
+        <button class="btn" style="margin-top:20px;" onclick="startLaborSteps()">ROZPOCZNIJ PRACĘ ⚔️</button>
+    </div>
+
+    <!-- DECYZJE / PYTANIA -->
+    <div id="screen-labor-step" class="card hidden">
+        <div id="success-overlay" class="success-overlay hidden">
+            <h2 id="success-title">POPRAWNA ODPOWIEDŹ! ⚔️</h2>
+            <p id="success-text" style="font-size:1.2rem; color:#fff; margin-top:10px;">Doskonały manewr! Przechodzisz dalej...</p>
+        </div>
+
+        <div id="gameover-overlay" class="gameover-overlay hidden">
+            <h2>GAME OVER! 💀</h2>
+            <p id="gameover-reason" style="font-size:1.1rem; color:#fff; margin:15px 0;">Potwór Cię pokonał! Popełniłeś błąd w walce.</p>
+            <p style="color:var(--gold);">Musisz wykonać minigrędopasowania, aby rozpocząć tę pracę OD POCZĄTKU!</p>
+            <button class="btn btn-danger" onclick="startPenalty()">Rób Minigrę Kary</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gold); padding-bottom:8px; margin-bottom:15px;">
+            <span id="step-labor-number" style="color:var(--gold); font-weight:bold;">Praca 1/12</span>
+            <span id="step-hero-tag"></span>
+        </div>
+
+        <p id="step-story-text" style="text-align:left; font-size:1.05rem; line-height:1.6;"></p>
+
+        <h4 id="step-question-text" style="margin: 15px 0; color:var(--gold);">Wybierz właściwy krok taktyczny:</h4>
+
+        <div class="options-list" id="step-options-container"></div>
+
+        <button class="btn btn-hero" id="hero-power-btn" onclick="useHeroPower()">✨ Moc Herosa (Pomiń ten krok)</button>
+    </div>
+
+    <!-- REAKCJA PO WYBORZE -->
+    <div id="screen-labor-reaction" class="card hidden">
+        <h2>Reakcja na Twój Wybór...</h2>
+        <p id="reaction-text" style="font-size:1.1rem; line-height:1.6; margin: 20px 0; padding:15px; background:rgba(0,0,0,0.4); border-radius:10px; border: 1px solid var(--gold);"></p>
+        <button class="btn" onclick="proceedAfterReaction()">Zobacz co się stanie! 💥</button>
+    </div>
+
+    <!-- MINIGRA KARY -->
+    <div id="screen-penalty" class="card hidden">
+        <h2 style="color:var(--accent-red);">KARA ZA BŁĄD 🧩</h2>
+        <p>Ułóż pary symboli mitologicznych, aby uleczyć rany i spróbować ponownie!</p>
+        
+        <div id="penalty-memory-box" class="memory-grid"></div>
+
+        <button class="btn btn-danger" id="penalty-restart-btn" style="display:none;" onclick="restartCurrentLabor()">Wróć na Początek Tej Pracy</button>
+    </div>
+
+    <!-- FINAŁ -->
+    <div id="screen-finish" class="card hidden">
+        <h1 style="color:var(--gold);">GRATULACJE! 🥇</h1>
+        <p>Pokonałeś wszystkie 12 prac Heraklesa!</p>
+        <p>Twój czas ukończenia: <b id="final-time" style="color:var(--gold);">--:--</b> | Porażki (Game Over): <b id="final-errors" style="color:var(--accent-red);">0</b></p>
+        
+        <div style="margin: 25px 0; padding:20px; background:rgba(0,0,0,0.4); border-radius:12px; border:2px solid var(--gold);">
+            <h3>Finałowy Quiz KAHOOT</h3>
+            <p>Kliknij poniższy przycisk, aby wziąć udział w finałowej rywalizacji:</p>
+            <a id="kahoot-link-btn" href="https://kahoot.it" target="_blank" class="btn" style="display:inline-block; text-decoration:none;">Przejdź do KAHOOT 🚀</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// --- POSTACIE MITYCZNE ---
+const HEROES = [
+    { id: 'h1', name: 'Tezeusz', icon: '⚔️', power: 'Arogancka Odwaga' },
+    { id: 'h2', name: 'Perseusz', icon: '🛡️', power: 'Błysk Tarczy' },
+    { id: 'h3', name: 'Bellerofont', icon: '🐎', power: 'Lot Pegaza' },
+    { id: 'h4', name: 'Atalanta', icon: '🏹', power: 'Szybki Łuk' },
+    { id: 'h5', name: 'Hippolita', icon: '👑', power: 'Dowodzenie Amazonek' },
+    { id: 'h6', name: 'Kasandra', icon: '🔮', power: 'Przepowiednia Wyroczni' }
+];
+
+// --- BAZA PRAC I PYTAŃ - POZIOM LICEUM (4-5 OPADÓW NA PYTANIE) ---
+const LABORS = [
+    {
+        title: "1. Lew Nemejski",
+        goal: "Twój cel: Odszukać i zgładzić potwornego Lwa Nemejskiego. Pamiętaj: stwory zrodzone z Tyfona i Echidny posiadają właściwości odpornościowe na wszelką metaliurgię!",
+        steps: [
+            {
+                story: "Docierasz pod jaskinię w Nemei. Lew wychodzi z cienia i ryczy. Jakie jest Twoje pierwsze uderzenie taktyczne?",
+                q: "Wybierz broń i metodę ataku z dystansu lub zwarcia:",
+                opts: [
+                    { txt: "Naciągasz łuk i celujesz w oko bestii.", react: "Strzała trafia w oko, lecz zsuwa się po powiece odpornej jak stal! Lew zaryczał ze złości i skoczył w Twoją stronę!", correct: false, reason: "Grot odbił się od pancernej skóry Lwa Nemejskiego!" },
+                    { txt: "Używasz hiszpańskiego miecza z brązu, celując w tętnicę szyjną.", react: "Głownia wygina się w łuk i pęka na skórze potwora! Lew wyprowadza kontrę!", correct: false, reason: "Żaden metal nie pancerza Lwa Nemejskiego!" },
+                    { txt: "Dobobywasz ciężkiej sękatej maczugi z drewna oliwnego i zagradzasz mu drogę.", react: "Świetny wybór! Siła obuchowa to jedyne, co poczuje ta bestia!", correct: true },
+                    { txt: "Próbujesz rzucić w niego ciężką włócznią z grotem z utwardzanego ognia.", react: "Włócznia pęka na pół bez zadania jakiejkolwiek rany!", correct: false, reason: "Nawet utwardzany grot nie przebija skóry lwa!" },
+                    { txt: "Podpalasz trawy wokół jaskini, by ustrzelić go w dymie.", react: "Dym rozciąga się po dolinie, ale lew bez trudu lokalizuje Cię węchem i atakuje!", correct: false, reason: "Trudny teren i dym nie osłabiły bestii!" }
+                ]
+            },
+            {
+                story: "Zamachujesz się maczugą i uderzasz lwa w łeb. Potwór zatacza się, ogłuszony cosem. Co robisz, nim odzyska przytomność?",
+                q: "Jaki jest Twój decydujący krok walki w zwarciu?",
+                opts: [
+                    { txt: "Próbujesz poderżnąć mu gardło sztyletem ze stali.", react: "Ostrze sztyletu łamie się, a lew odzyskuje przytomność i wyprowadza cios pazurami!", correct: false, reason: "Stal uległa pęknięciu na skórze potwora!" },
+                    { txt: "Rzucasz się na niego i dusisz go gołymi rękami, zamykając dopływ powietrza.", react: "Rzucasz się na bestię! Twarde ramiona zaciskają tchawicę potwora aż do zgaśnięcia życia!", correct: true },
+                    { txt: "Próbujesz złamać mu kręgosłup naciskiem maczugi na grzbiet.", react: "Maczuga pęka pod siłą nacisku na sztywny grzbiet lwa!", correct: false, reason: "Grzbiet lwa był zbyt twardy dla drewnianej broni!" },
+                    { txt: "Wlewasz mu do pyska trującą miksturę z piołunu.", react: "Lew odzyskuje przytomność i zagryza Cię przy próbie otwarcia pyska!", correct: false, reason: "Bliski kontakt z pyskiem przytomniejącej bestii okazał się śmiertelny!" }
+                ]
+            },
+            {
+                story: "Lew zostaje uduszony! Pora zdjąć niezniszczalną skórę, by służyła jako pancerz. Żelazne noże są bezużyteczne.",
+                q: "Czym rozetniesz skórę zgładzonego Lwa?",
+                opts: [
+                    { txt: "Używasz ostrych pazurów samego zgładzonego lwa.", react: "Niezwykły pomysł! Jedynie własne pazury lwa są w stanie rozciąć jego niezniszczalną skórę!", correct: true },
+                    { txt: "Używasz krzemiennych odłamków znalezionych przy jaskini.", react: "Krzemień kruszy się w pył na skórze lwa!", correct: false, reason: "Krzemień nie dorównuje twardości skóry lwa!" },
+                    { txt: "Opalasz skórę ogniskiem, by osłabić jej strukturę.", react: "Ogień nie robi na skórze żadnego wrażenia, lecz niszczy jej jakość!", correct: false, reason: "Ogień nie osłabił magicznej skóry lwa!" },
+                    { txt: "Nacinasz zęby lwa za pomocą ciężkiego młota.", react: "Zęby pękają na kawałki bez nacięcia skóry!", correct: false, reason: "Zęby były zbyt tępe w porównaniu z pazurami!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "2. Hydra Lernejska",
+        goal: "Twój cel: Zgładzić wielogłową Hydrę na bagnach Lerny. Uwaga: Woda jest zatruta jadem, a odcinanie głow wywołuje reakcję regeneracyjną!",
+        steps: [
+            {
+                story: "Wyciągasz wykuty miecz i odcinasz pierwszą głowę Hydry. Nagle z rany wyrastają od razu dwie nowe głowy! Co robisz?",
+                q: "Wybierz właściwy wariant wsparcia taktycznego:",
+                opts: [
+                    { txt: "Nadal ścinasz głowy mieczem, licząc na to, że potwór się zmęczy.", react: "Po kilku minutach Hydra ma ponad dwadzieścia głów i całkowicie Cię przytłacza!", correct: false, reason: "Liczba głów rosła w postępie geometrycznym!" },
+                    { txt: "Wzywasz pomocnika Jolaosa, by przypalał rany po ściętych głowach pochodnią.", react: "Świetna taktyka! Ogień przypala tkankę i powstrzymuje odrastanie nowych głów!", correct: true },
+                    { txt: "Wylewasz na szyję potwora kwas z trujących ziół.", react: "Kwas miesza się z jadem Hydry i wzmacnia jej pancerz!", correct: false, reason: "Zioła nie powstrzymały regeneracji!" },
+                    { txt: "Tryskasz wodą morską w rany potwora.", react: "Sól morska wzmaga wściekłość potwora bez zatrzymania regeneracji!", correct: false, reason: "Sól nie wypaliła tkanki szyi!" }
+                ]
+            },
+            {
+                story: "Została ostatnia nieśmiertelna głowa Hydry. Ścinasz ją mieczem. Jak neutralizujesz zagrożenie?",
+                q: "Co robisz z nieśmiertelną głową?",
+                opts: [
+                    { txt: "Spalasz ją w wielkim stosie drewna.", react: "Ogień gaśnie, a nieśmiertelna głowa nadal syczy w popiołach!", correct: false, reason: "Głowa była odporna na płomienie!" },
+                    { txt: "Zakopujesz ją głęboko i przywalasz ogromnym, ciężkim głazem.", react: "Nieśmiertelna głowa zostaje trwale unieruchomiona pod ciężarem skały!", correct: true },
+                    { txt: "Wrzucasz ją do najgłębszego miejsca w oceanie.", react: "Głowa zatruwa morskie prądy i powraca wyrzucona przez fale!", correct: false, reason: "Nieśmiertelna głowa wymagała uwięzienia pod skałą!" },
+                    { txt: "Zamykasz ją w miedzianym pitosie i oddajesz Eurysteuszowi.", react: "Głowa przegryza miedź i atakuje pałac!", correct: false, reason: "Miedź nie była w stanie utrzymać jadu nieśmiertelnej głowy!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "3. Łania Kerynejska",
+        goal: "Twój cel: Schwytać żywą Łanię Kerynejską o złotych rogach i spiżowych kopytach. Pamiętaj: Łania należy do bogini Artemidy!",
+        steps: [
+            {
+                story: "Ścigasz łanię przez rok. Zwierzę zatrzymuje się przy rzece Ladon. Jak ją schwytasz, by nie złamać zakazu zranienia?",
+                q: "Wybierz metodę pojmania:",
+                opts: [
+                    { txt: "Strzelasz z łuku w jej kopyto z brązu.", react: "Strzała rani łanię! Artemida zstępuje z nieba z gniewem!", correct: false, reason: "Zranienie łani sprowadziło gniew bogini!" },
+                    { txt: "Zarzucasz na nią sieć, gdy wycieńczona pije wodę z rzeki Ladon.", react: "Łania zaplątuje się w sieć bez ani jednej rany na ciele!", correct: true },
+                    { txt: "Próbujesz podać jej środki nasenne w jabłku.", react: "Łania wyczuwa obcy zapach i ucieka w góry!", correct: false, reason: "Łania wyczuła podstęp!" },
+                    { txt: "Pędzisz za nią w wodę i chwytasz za złoce rogi siłą.", react: "Spiżowe kopyta ranią Cię w klatkę piersiową!", correct: false, reason: "Spiżowe kopyta były niebezpieczną bronią w walce bezpośredniej!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "4. Dzik Erymantejski",
+        goal: "Twój cel: Pojmać żywego dzika z góry Erymantos i przynieść go przed Eurysteusza.",
+        steps: [
+            {
+                story: "Szarżujący dzik taranuje drzewa na górzystym stoku Erymantos. Jak go unieruchomisz?",
+                q: "Jaka jest właściwa taktyka wykorzystania terenu?",
+                opts: [
+                    { txt: "Wgonisz dzika w głębokie zaspy śnieżne w wyższych partiach góry.", react: "Dzik wjeżdża w głęboki śnieg i grzęźnie, nie mogąc się poruszać!", correct: true },
+                    { txt: "Zbudujesz na niego drewnianą palisadę.", react: "Dzik roznosi palisadę w pył i taranuje Cię!", correct: false, reason: "Drewno nie powstrzymało impetu dzika!" },
+                    { txt: "Próbujesz chwycić go za kły w locie.", react: "Kły dzika przebijają pancerz!", correct: false, reason: "Atak od przodu skończył się stratowaniem!" },
+                    { txt: "Używasz zatrutych strzał usypiających.", react: "Trucizna zabija dzika zamiast go pojmać żywego!", correct: false, reason: "Dzik miał trafić żywy do Myken!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "5. Stajnie Augiasza",
+        goal: "Twój cel: Oczyszczenie w JEDEN DZIEŃ stajni króla Augiasza, w których obornik gromadził się od 30 lat.",
+        steps: [
+            {
+                story: "Stoisz przed gigantyczną masą nieczystości. W pobliżu płyną rzeki Alfejos i Penejos.",
+                q: "Jaki jest Twój plan inżynieryjny?",
+                opts: [
+                    { txt: "Przekierowujesz nurty rzek Alfejos i Penejos poprzez wyłom w murach.", react: "Bystry nurt wody spłukuje cały obornik w kilka godzin!", correct: true },
+                    { txt: "Zatrudniasz okolicznych wieśniaków z łopatami.", react: "Praca trwa całą dobę i oczyszcza zaledwie ułamek stajni!", correct: false, reason: "Ludzka siła nie wystarczyła na jeden dzień!" },
+                    { txt: "Używasz ognia, by wypalić nieczystości.", react: "Ogień niszczy całe królestwo i stajnie!", correct: false, reason: "Spalenie stajni nie było rozwiązaniem!" },
+                    { txt: "Próbujesz zasypać stajnie piaskiem z plaży.", react: "Masa odpadów tylko się powiększa!", correct: false, reason: "Piasek zwiększył objętość nieczystości!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "6. Ptaki Stymfalijskie",
+        goal: "Twój cel: Wygnanie lub zgładzenie ptaków ze spiżowymi dziobami i metalowymi piórami z lasów Stymfalos.",
+        steps: [
+            {
+                story: "Ptaki ukrywają się w gęstych korona drzew i zrzucają ostre pióra.",
+                q: "Jak je wypłoszysz z ukrycia?",
+                opts: [
+                    { txt: "Używasz miedzianych kołatek od Hefajstosa podarowanych przez Atenę.", react: "Ogłuszający hałas przeraża ptaki, które wzbijają się w niebo pod Twój łuk!", correct: true },
+                    { txt: "Podpalasz las Stymfalos.", react: "Dym poddusza Cię, a ptaki odlatują niezranione!", correct: false, reason: "Podpalenie lasu naraziło Cię na niebezpieczeństwo!" },
+                    { txt: "Wspinasz się na korony drzew z mieczem.", react: "Ptaki zasypują Cię gradem ostrych piór!", correct: false, reason: "Atak w koronach drzew był samobójstwem!" },
+                    { txt: "Próbujesz zwabić je ziarnem na polanę.", react: "Ptaki ignorują ziarno i atakują Cię z góry!", correct: false, reason: "Ptaki stymfalijskie żywiły się mięsem!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "7. Byk Kreteński",
+        goal: "Twój cel: Poskromić szalonego byka z Krety i sprowadzić go do Grecji.",
+        steps: [
+            {
+                story: "Byk szarżuje na polach Krety. Jak go obezwładnisz i przetransportujesz?",
+                q: "Wybierz właściwy wariant działania:",
+                opts: [
+                    { txt: "Chwytasz go za rogi, powalasz siłą i przepływasz na jego grzbiecie morze.", react: "Niezwykła siła powala byka! Przepływasz na jego grzbiecie wprost do Peloponezu!", correct: true },
+                    { txt: "Budujesz klatkę z grubych pni drzew.", react: "Byk roznosi klatkę pierwszym uderzeniem rogu!", correct: false, reason: "Drewno nie wytrzymało siły byka Posejdona!" },
+                    { txt: "Zatruwasz mu wodę ziołami.", react: "Byk staje się jeszcze bardziej wściekły!", correct: false, reason: "Zioła nie poskromiły boskiego byka!" },
+                    { txt: "Wzywasz na pomoc lokalną flotę króla Minosa.", react: "Byk taranuje statki na brzegu!", correct: false, reason: "Flota nie pomogła w walce bezpośredniej!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "8. Klacze Diomedesa",
+        goal: "Twój cel: Zdobyć cztery dzikie klacze króla Diomedesa, żywiące się ludzkim mięsem.",
+        steps: [
+            {
+                story: "Dzikie konie rzucają się na każdego w pałacu Diomedesa.",
+                q: "Jak uspokoisz mięsożerne bestie?",
+                opts: [
+                    { txt: "Rzucasz im na pożarcie samego okrutnego króla Diomedesa.", react: "Konie pożerają swojego pana, uspokajają się i dają wyprowadzić!", correct: true },
+                    { txt: "Dajesz im świeżą trawę i owies.", react: "Konie ignorują rośliny i rzucają się na Twoje ramiona!", correct: false, reason: "Klacze jadły wyłącznie ludzkie mięso!" },
+                    { txt: "Związujesz je żelaznymi łańcuchami.", react: "Klacze przegryzają metalowe ogniwa zębami!", correct: false, reason: "Siła ich szczęk kruszyła metal!" },
+                    { txt: "Próbujesz je uśpić śpiewem.", react: "Hałas tylko potęguje ich agresję!", correct: false, reason: "Śpiew nie działał na mięsożerne bestie!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "9. Pas Hipolity",
+        goal: "Twój cel: Zdobyć pas wojenny od królowej Amazonek – Hipolity.",
+        steps: [
+            {
+                story: "Hera rozsiewa plotkę wśród Amazonek, że chcesz porwać Hipolitę. Wybuchają walki.",
+                q: "Jak zdobywasz pas w zamieszaniu?",
+                opts: [
+                    { txt: "Stajesz do bezwzględnej walki i torujesz sobie drogę wyjścia z pasem.", react: "Pokonujesz natarcie i uchodzisz z pasem na statek!", correct: true },
+                    { txt: "Zrzucasz broń i próbujesz tłumaczyć nieporozumienie.", react: "Amazonki biorą Cię w niewolę i odbierają broń!", correct: false, reason: "Poddanie się doprowadziło do porażki!" },
+                    { txt: "Uciekasz do lasu bez pasa.", react: "Misja kończy się fiaskiem!", correct: false, reason: "Ucieczka bez pasa nie realizowała celu!" },
+                    { txt: "Próbujesz podpalić obóz Amazonek.", react: "Ogień odcina Ci drogę ucieczki!", correct: false, reason: "Pożar zablokował wyjście z obozu!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "10. Trzoda Geriona",
+        goal: "Twój cel: Uprowadzić czerwone woły Geriona z wyspy Eryteja.",
+        steps: [
+            {
+                story: "Stajesz do walki z dwugłowym psem Orthrosem i trójcielistym Gerionem.",
+                q: "Jak pokonujesz Geriona?",
+                opts: [
+                    { txt: "Zabijasz psa maczugą, a Geriona przebijasz jedną strzałą przez trzy ciała.", react: "Celna strzała przechodzi przez miejsca łączenia trzech ciał Geriona!", correct: true },
+                    { txt: "Próbujesz walczyć mieczem z trzema ciałami naraz.", react: "Sześć rąk Geriona zasypuje Cię ciosami tarcz!", correct: false, reason: "Walka w zwarciu z trzema ciałami była niemożliwa!" },
+                    { txt: "Próbujesz przekupić Geriona złotem.", react: "Olbrzym gardzi złotem i atakuje Cię!", correct: false, reason: "Gerion nie interesował się bogactwem!" },
+                    { txt: "Ukrywasz się w stado i czekasz na noc.", react: "Pies Orthros wyczuwa Cię węchem!", correct: false, reason: "Pies wyczuł obcy zapach natychmiast!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "11. Złote Jabłka Hesperyd",
+        goal: "Twój cel: Zdobyć złote jabłka z ogrodu strzeżonego przez smoka Ladona.",
+        steps: [
+            {
+                story: "Atlas przynosi jabłka, ale nie chce wziąć nieba z powrotem na barki.",
+                q: "Jakiego podstępu użyjesz?",
+                opts: [
+                    { txt: "Prosisz go o chwilę na podłożenie poduszki pod kark, po czym zabierasz jabłka.", react: "Atlas bierze niebo na chwilę, a Ty zabierasz jabłka i odchodzisz!", correct: true },
+                    { txt: "Zaatakujesz go mieczem trzymając niebo.", react: "Niebo spada i miażdży całą okolicę!", correct: false, reason: "Nie mogłeś walczyć trzymając cały świat!" },
+                    { txt: "Oferujesz mu złoto w zamian za przejęcie nieba.", react: "Atlas ignoruje złoto, ciesząc się wolnością!", correct: false, reason: "Atlas nie chciał wolności za pieniądze!" },
+                    { txt: "Uciekasz rzucając niebo na ziemię.", react: "Świat ulega zagładzie!", correct: false, reason: "Rzucenie sklepienia zniszczyłoby wszystko!" }
+                ]
+            }
+        ]
+    },
+    {
+        title: "12. Cerber z Podziemi",
+        goal: "Twój cel: Sprowadzenie Cerbera z Hadesu BEZ UŻYCIA BRONI.",
+        steps: [
+            {
+                story: "Stajesz przed trójgłowym Cerberem w Hadesie.",
+                q: "Jak go poskromisz gołymi rękami?",
+                opts: [
+                    { txt: "Obywasz go siłą ramion, dusząc potwora aż do uległości.", react: "Bestia zostaje poskromiona i idzie za Tobą na powierzchnię!", correct: true },
+                    { txt: "Używasz ukrytego w szacie sztyletu.", react: "Hades wtrąca Cię do Tartaru za złamanie umowy!", correct: false, reason: "Użycie broni złamało słowo dane Hadesowi!" },
+                    { txt: "Próbujesz dać mu mięso.", react: "Cerber pożera mięso i atakuje Twoją rękę!", correct: false, reason: "Cerber nie dał się przekupić jedzeniem!" },
+                    { txt: "Uciekasz przez rzekę Styks.", react: "Karon odmawia przewozu bez zapłaty!", correct: false, reason: "Ucieczka przez Styks była zablokowana!" }
+                ]
+            }
+        ]
+    }
+];
+
+// --- STAN ---
+let state = {
+    role: null,
+    roomCode: null,
+    playerName: '',
+    selectedHero: null,
+    heroPowerUsed: false,
+    currentLaborIdx: 0,
+    currentStepIdx: 0,
+    gameOversCount: 0,
+    startTime: null,
+    finishTimeStr: '',
+    chosenOpt: null,
+    channel: null
+};
+
+let roomState = {
+    code: null,
+    gameStarted: false,
+    players: {}
+};
+
+window.onload = function() {
+    setupAvatarGrid();
+    initCanvas();
+    
+    state.channel = new BroadcastChannel('herakles_rpg_channel');
+    state.channel.onmessage = handleBroadcastMessage;
+};
+
+function show(id) {
+    document.querySelectorAll('.container > .card').forEach(c => c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+// --- HOST ---
+function openHostLogin() { show('screen-host-login'); }
+
+function submitHostLogin() {
+    const pass = document.getElementById('host-pass-input').value.trim();
+    if (pass === '7778') {
+        state.role = 'host';
+        state.roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+        roomState.code = state.roomCode;
+        roomState.gameStarted = false;
+        roomState.players = {};
+
+        document.getElementById('host-code-display').innerText = state.roomCode;
+        show('screen-host-panel');
+        updateHostView();
+        broadcastState();
+    } else {
+        alert("Błędny kod! Wpisz 7778");
+    }
+}
+
+function updateHostView() {
+    const pArr = Object.values(roomState.players);
+    document.getElementById('player-count').innerText = pArr.length;
+
+    document.getElementById('player-list-names').innerHTML = pArr.map(p => `
+        <span style="display:inline-block; margin:5px; padding:6px 12px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid var(--gold);">
+            ${p.hero.icon} <b>${p.name}</b>
+        </span>
+    `).join('') || "Czekam na graczy...";
+
+    document.getElementById('host-tbody').innerHTML = pArr.map(p => `
+        <tr>
+            <td><b>${p.name}</b></td>
+            <td>${p.hero.icon} ${p.hero.name}</td>
+            <td>${p.finished ? 'UKOŃCZONO 🏁' : (p.labor + 1) + ' / 12'}</td>
+            <td style="color:var(--accent-red); font-weight:bold;">${p.errors}</td>
+            <td>${p.finished ? '🥇 Koniec (' + p.time + ')' : 'W walce'}</td>
+        </tr>
+    `).join('');
+
+    if (roomState.gameStarted && pArr.length > 0 && pArr.every(p => p.finished)) {
+        showHostPodium();
+    }
+}
+
+function startHostGame() {
+    if (Object.keys(roomState.players).length === 0) {
+        alert("Poczekaj na uczniów!");
+        return;
+    }
+    roomState.gameStarted = true;
+    document.getElementById('host-lobby-view').classList.add('hidden');
+    document.getElementById('host-game-view').classList.remove('hidden');
+    broadcastState();
+}
+
+function showHostPodium() {
+    document.getElementById('host-game-view').classList.add('hidden');
+    document.getElementById('host-podium-view').classList.remove('hidden');
+
+    const sorted = Object.values(roomState.players).sort((a,b) => a.errors - b.errors);
+
+    if (sorted[0]) { document.getElementById('pod-1-name').innerText = sorted[0].name; document.getElementById('pod-1-time').innerText = sorted[0].time; }
+    if (sorted[1]) { document.getElementById('pod-2-name').innerText = sorted[1].name; document.getElementById('pod-2-time').innerText = sorted[1].time; }
+    if (sorted[2]) { document.getElementById('pod-3-name').innerText = sorted[2].name; document.getElementById('pod-3-time').innerText = sorted[2].time; }
+}
+
+// --- JOIN ---
+function setupAvatarGrid() {
+    document.getElementById('avatar-select-grid').innerHTML = HEROES.map(h => `
+        <div class="avatar-card" id="avatar-${h.id}" onclick="selectAvatar('${h.id}')">
+            <span class="avatar-icon">${h.icon}</span>
+            <div style="font-weight:bold; font-size:0.9rem;">${h.name}</div>
+            <div style="font-size:0.75rem; color:var(--gold); margin-top:3px;">${h.power}</div>
+        </div>
+    `).join('');
+}
+
+function selectAvatar(id) {
+    document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`avatar-${id}`).classList.add('selected');
+    state.selectedHero = HEROES.find(h => h.id === id);
+}
+
+function openJoin() { show('screen-join'); }
+
+function submitJoin() {
+    const code = document.getElementById('join-room-code').value.trim();
+    const name = document.getElementById('join-player-name').value.trim();
+
+    if (!code || !name || !state.selectedHero) {
+        alert("Wpisz kod, imię i wybierz herosa!");
+        return;
+    }
+
+    state.role = 'player';
+    state.roomCode = code;
+    state.playerName = name;
+
+    notifyPlayerJoin();
+
+    document.getElementById('wait-name-display').innerText = `${state.selectedHero.icon} ${name}`;
+    show('screen-player-wait');
+}
+
+// --- CANVAS ---
+let cvs, ctx, drawing = false;
+function initCanvas() {
+    cvs = document.getElementById('swordCanvas');
+    ctx = cvs.getContext('2d');
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#2c1a0e';
+    cvs.onmousedown = () => drawing = true;
+    cvs.onmouseup = () => drawing = false;
+    cvs.onmousemove = (e) => {
+        if (!drawing) return;
+        const r = cvs.getBoundingClientRect();
+        ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+        ctx.stroke();
+    };
+    cvs.ontouchstart = (e) => { drawing = true; const r = cvs.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); };
+    cvs.ontouchmove = (e) => { if (drawing) { const r = cvs.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); ctx.stroke(); } };
+    cvs.ontouchend = () => drawing = false;
+}
+function clearCanvas() { ctx.clearRect(0,0,300,220); ctx.beginPath(); }
+function confirmWeapon() {
+    state.startTime = new Date();
+    startLabor(0);
+}
+
+// --- RPG ENGINE ---
+function startLabor(idx) {
+    state.currentLaborIdx = idx;
+    state.currentStepIdx = 0;
+
+    const labor = LABORS[idx];
+    document.getElementById('intro-title').innerText = labor.title;
+    document.getElementById('intro-goal-text').innerText = labor.goal;
+
+    show('screen-labor-intro');
+    notifyPlayerProgress();
+}
+
+function startLaborSteps() { renderLaborStep(); }
+
+function renderLaborStep() {
+    show('screen-labor-step');
+    document.getElementById('success-overlay').classList.add('hidden');
+    document.getElementById('gameover-overlay').classList.add('hidden');
+
+    const labor = LABORS[state.currentLaborIdx];
+    const step = labor.steps[state.currentStepIdx];
+
+    document.getElementById('step-labor-number').innerText = `${labor.title} (Etap ${state.currentStepIdx + 1}/${labor.steps.length})`;
+    document.getElementById('step-hero-tag').innerText = `${state.selectedHero.icon} ${state.playerName}`;
+    document.getElementById('step-story-text').innerText = step.story;
+    document.getElementById('step-question-text').innerText = step.q;
+
+    const optsBox = document.getElementById('step-options-container');
+    optsBox.innerHTML = step.opts.map((opt, i) => `
+        <div class="option-card" onclick="chooseOption(${i})">
+            <span>⚔️</span>
+            <div>${opt.txt}</div>
+        </div>
+    `).join('');
+
+    const btnPower = document.getElementById('hero-power-btn');
+    if (state.heroPowerUsed) {
+        btnPower.style.display = 'none';
+    } else {
+        btnPower.style.display = 'block';
+        btnPower.innerText = `✨ Moc Herosa ${state.selectedHero.name} (Pomiń ten krok bez ryzyka)`;
+    }
+}
+
+function chooseOption(idx) {
+    const labor = LABORS[state.currentLaborIdx];
+    const step = labor.steps[state.currentStepIdx];
+    const opt = step.opts[idx];
+
+    state.chosenOpt = opt;
+    document.getElementById('reaction-text').innerText = opt.react;
+    show('screen-labor-reaction');
+}
+
+function proceedAfterReaction() {
+    const opt = state.chosenOpt;
+
+    if (opt.correct) {
+        show('screen-labor-step');
+        document.getElementById('success-overlay').classList.remove('hidden');
+
+        setTimeout(() => {
+            state.currentStepIdx++;
+            const labor = LABORS[state.currentLaborIdx];
+
+            if (state.currentStepIdx >= labor.steps.length) {
+                if (state.currentLaborIdx + 1 >= LABORS.length) {
+                    finishGame();
+                } else {
+                    startLabor(state.currentLaborIdx + 1);
+                }
+            } else {
+                renderLaborStep();
+            }
+        }, 1200);
+    } else {
+        show('screen-labor-step');
+        document.getElementById('gameover-reason').innerText = opt.reason;
+        document.getElementById('gameover-overlay').classList.remove('hidden');
+
+        state.gameOversCount++;
+        notifyPlayerProgress();
+    }
+}
+
+function useHeroPower() {
+    if (state.heroPowerUsed) return;
+    state.heroPowerUsed = true;
+
+    alert(`Użyłeś mocy: ${state.selectedHero.power} (Postać: ${state.selectedHero.name})! Zaliczasz ten krok!`);
+
+    state.currentStepIdx++;
+    const labor = LABORS[state.currentLaborIdx];
+
+    if (state.currentStepIdx >= labor.steps.length) {
+        if (state.currentLaborIdx + 1 >= LABORS.length) {
+            finishGame();
+        } else {
+            startLabor(state.currentLaborIdx + 1);
+        }
+    } else {
+        renderLaborStep();
+    }
+}
+
+// --- MINIGRA KARY ---
+let memFlipped = [], memMatched = 0;
+
+function startPenalty() {
+    show('screen-penalty');
+    const box = document.getElementById('penalty-memory-box');
+    box.innerHTML = '';
+    document.getElementById('penalty-restart-btn').style.display = 'none';
+
+    const icons = ['🦁', '🦁', '🐍', '🐍', '🐗', '🐗', '🐂', '🐂'];
+    icons.sort(() => Math.random() - 0.5);
+    memFlipped = []; memMatched = 0;
+
+    icons.forEach((icon, i) => {
+        const c = document.createElement('div');
+        c.className = 'memory-card';
+        c.dataset.icon = icon;
+        c.innerText = '❓';
+        c.onclick = () => flipCard(c);
+        box.appendChild(c);
+    });
+}
+
+function flipCard(c) {
+    if (memFlipped.length >= 2 || c.classList.contains('flipped')) return;
+
+    c.classList.add('flipped');
+    c.innerText = c.dataset.icon;
+    memFlipped.push(c);
+
+    if (memFlipped.length === 2) {
+        if (memFlipped[0].dataset.icon === memFlipped[1].dataset.icon) {
+            memMatched += 2;
+            memFlipped = [];
+            if (memMatched === 8) {
+                document.getElementById('penalty-restart-btn').style.display = 'inline-block';
+            }
+        } else {
+            setTimeout(() => {
+                memFlipped.forEach(card => { card.classList.remove('flipped'); card.innerText = '❓'; });
+                memFlipped = [];
+            }, 700);
+        }
+    }
+}
+
+function restartCurrentLabor() { startLabor(state.currentLaborIdx); }
+
+// --- FINAŁ ---
+function finishGame() {
+    const diff = Math.floor((new Date() - state.startTime) / 1000);
+    const m = Math.floor(diff / 60);
+    const s = diff % 60;
+    state.finishTimeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+
+    document.getElementById('final-time').innerText = state.finishTimeStr;
+    document.getElementById('final-errors').innerText = state.gameOversCount;
+
+    show('screen-finish');
+    notifyPlayerProgress(true);
+}
+
+// --- SYNC ---
+function broadcastState() { state.channel.postMessage({ type: 'SYNC_ROOM', roomState: roomState }); }
+
+function notifyPlayerJoin() {
+    state.channel.postMessage({
+        type: 'PLAYER_JOIN',
+        roomCode: state.roomCode,
+        player: { name: state.playerName, hero: state.selectedHero, labor: 0, errors: 0, finished: false, time: '' }
+    });
+}
+
+function notifyPlayerProgress(finished = false) {
+    state.channel.postMessage({
+        type: 'PLAYER_PROGRESS',
+        roomCode: state.roomCode,
+        name: state.playerName,
+        labor: state.currentLaborIdx,
+        errors: state.gameOversCount,
+        finished: finished,
+        time: state.finishTimeStr
+    });
+}
+
+function handleBroadcastMessage(e) {
+    const msg = e.data;
+
+    if (msg.type === 'SYNC_ROOM' && state.role === 'player') {
+        if (msg.roomState.code === state.roomCode && msg.roomState.gameStarted) {
+            if (!document.getElementById('screen-player-wait').classList.contains('hidden')) {
+                show('screen-draw-weapon');
+            }
+        }
+    }
+
+    if (msg.type === 'PLAYER_JOIN' && state.role === 'host') {
+        if (msg.roomCode === state.roomCode) {
+            roomState.players[msg.player.name] = msg.player;
+            updateHostView();
+            broadcastState();
+        }
+    }
+
+    if (msg.type === 'PLAYER_PROGRESS' && state.role === 'host') {
+        if (msg.roomCode === state.roomCode && roomState.players[msg.name]) {
+            roomState.players[msg.name].labor = msg.labor;
+            roomState.players[msg.name].errors = msg.errors;
+            roomState.players[msg.name].finished = msg.finished;
+            roomState.players[msg.name].time = msg.time;
+            updateHostView();
+        }
+    }
+}
+</script>
+</body>
+</html>
